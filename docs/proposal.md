@@ -13,3 +13,4 @@ This project will extract textual data from a project gutenberg book.
 * definitions
 
 ## Proposed layout
+![proposed layout](proposal.jpg)

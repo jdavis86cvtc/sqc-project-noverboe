@@ -8,9 +8,13 @@ This project will extract textual data from a project gutenberg book.
 [Six months in the gold mines by E. Gould Buffum](https://www.gutenberg.org/ebooks/71574)
 
 ## Items of interest
+* thumbnail
+* title
+* author
+* publisher
 * chapters
-* pages
-* definitions
+* page count
+
 
 ## Proposed layout
-![proposed layout](proposal.jpg)
+![proposed layout](gutenberg.jpeg)

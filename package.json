@@ -1,0 +1,29 @@
+{
+  "name": "sqc-project-noverboe",
+  "version": "1.0.0",
+  "description": "Your given and family name.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/it-sd-sqc/sqc-project-noverboe.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/it-sd-sqc/sqc-project-noverboe/issues"
+  },
+  "homepage": "https://github.com/it-sd-sqc/sqc-project-noverboe#readme",
+  "devDependencies": {
+    "html-validate": "^8.4.0",
+    "standard": "^17.1.0",
+    "stylelint": "^15.10.3",
+    "stylelint-config-standard": "^34.0.0"
+  }
+}

@@ -12,9 +12,14 @@ This project will extract textual data from a project gutenberg book.
 * title
 * author
 * publisher
+## Data Table Items of interest
 * chapters
 * page count
 
+---
+ER Diagram
+---
+![ER Diagram](ERdiagram.png)
 
 ## Proposed layout
 ![proposed layout](gutenberg.jpeg)

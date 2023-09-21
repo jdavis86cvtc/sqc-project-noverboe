@@ -112,14 +112,14 @@ const chapters = []
 chapterIds.forEach((id, index) => {
   // Extract the title and body
   const titleElement = extractTitle(domRoot, id);
+  const chapterElement = domRoot.querySelector(`div#${id}`);
 
-  // Extract text content and calculate word count
-  const chapterTitle = titleElement.textContent;
-  const wordCount = calculateWordCount(titleElement);
+  const chapterContent = chapterElement.text;
+  const wordCount = calculateWordCount(chapterContent);
 
   chapters.push({
     chapter_number: index + 1, // Chapter numbers start from 1
-    chapter_title: chapterTitle,
+    chapter_title: titleElement,
     word_count: wordCount
   });
 });
@@ -130,8 +130,8 @@ writeFileSync(fd, sqlHeader)
 
 // Insert chapter data
 chapters.forEach((chapter, index) => {
-  const { chapter_number, chapter_title, word_count, body } = chapter;
-  const value = `(${index + 1}, '${chapter_number}', '${chapter_title}', '${word_count}', '${body}')`;
+  const { chapter_number, chapter_title, word_count} = chapter;
+  const value = `(${bookId}, '${chapter_number}', '${chapter_title}', '${word_count}'`;
   if (index === 0) {
     writeFileSync(fd, `(${value}`);
   } else {

@@ -25,22 +25,63 @@ import pkg from 'svgoban'
 const { serialize } = pkg
 
 // Configuration ///////////////////////////////////////////
+const bookId = 1;
 const srcPath = 'data/AlicesAdventuresInWonderlandLewisCarroll.htm'
 const dstPath = 'docs/generated-schema.sql'
 const chapterIds = [
-  'Down the Rabbit-Hole',
-  'The Pool of Tears',
-  'A Caucus-Race and a Long Tale',
-  'The Rabbit Sends in a Little Bill',
-  'Advice from a Caterpillar',
-  'Pig and Pepper',
-  'A Mad Tea-Party',
-  'The Queen\'s Croquet-Ground',
-  'The Mock Turtle\'s Story',
-  'The Lobster Quadrille',
-  'Who Stole the Tarts?',
-  'Alice\'s Evidence'
+  'chap01',
+  'chap02',
+  'chap03',
+  'chap04',
+  'chap05',
+  'chap06',
+  'chap07',
+  'chap08',
+  'chap09',
+  'chap10',
+  'chap11',
+  'chap12'
 ]
+
+const gobanConfig = {
+  size: 19,
+  theme: 'classic',
+  coordSystem: 'A1',
+  noMargin: false,
+  hideMargin: false
+}
+
+// Utility functions ///////////////////////////////////////
+const extractTitle = function (root, id) {
+  const chapterElement = root.querySelector(`div#${id}`);
+  console.log("chapterElement: " + chapterElement);
+
+  if (chapterElement) {
+    const title = chapterElement.querySelector('h2');
+    if (title) {
+      return title.textContent;
+    } else {
+      console.error(`Title for chapter with id '${id}' not found.`);
+      return null;
+    }
+  } else {
+    console.error(`Chapter with id '${id}' not found.`);
+    return null;
+  }
+}
+
+const calculateWordCount = (text) => {
+  const words = text.split(/\s+/);
+  return words.length;
+};
+
+// Conversion //////////////////////////////////////////////
+const src = readFileSync(srcPath, 'utf8')
+const domRoot = parse(src)
+
+// Extract the book title from the HTML
+const bookTitleElement = domRoot.querySelector('title');
+const bookTitle = bookTitleElement.textContent;
 
 const sqlHeader = `\\encoding UTF8
 
@@ -61,88 +102,9 @@ CREATE TABLE chapters (
   word_count INT NOT NULL
 );
 
-INSERT INTO chapters (title, body) VALUES
+INSERT INTO book (book_id, book_name) VALUES (${bookId}, '${bookTitle}');
+INSERT INTO chapters (book_id, chapter_number, chapter_title, word_count) VALUES
 `
-
-const gobanConfig = {
-  size: 19,
-  theme: 'classic',
-  coordSystem: 'A1',
-  noMargin: false,
-  hideMargin: false
-}
-
-// Utility functions ///////////////////////////////////////
-const extractTitle = function (root, id) {
-  const chapterElement = root.querySelector(`#${id}`);
-  const title = chapterElement.querySelector('h2');
-  return title
-}
-
-const extractBody = function (root, id, pruneChildrenSelector) {
-  const bodyNode = root.querySelector(`#${id} .divBody`)
-
-  if (pruneChildrenSelector) {
-    const children = bodyNode.querySelectorAll(pruneChildrenSelector)
-    children.forEach((child) => {
-      child.remove()
-    })
-  }
-
-  const calculateWordCount = (text) => {
-    const words = text.split(/\s+/); // Split text by whitespace
-    return words.length;
-  };
-
-  // The <img> tags point to the wrong directory, so we
-  // need to change them here.
-  bodyNode.querySelectorAll('img').forEach(
-    (image) => {
-      const oldSrc = image.getAttribute('src')
-      const oldSrcTokens = oldSrc.split('/')
-      const newSrc = `/images/book/${oldSrcTokens[oldSrcTokens.length - 1]}`
-      image.setAttribute('src', newSrc)
-    }
-  )
-
-  // Return HTML with the line endings normalized to Unix.
-  bodyNode.innerHTML = bodyNode.innerHTML.replaceAll('\r\n', '\n')
-  bodyNode.innerHTML = bodyNode.innerHTML.trim()
-  return bodyNode
-}
-
-const extractMoves = function (output, player, moveSrc) {
-  // Remove newline.
-  const withDots = moveSrc.trim()
-
-  // Remove periods.
-  const clean = withDots.replaceAll('.', '')
-
-  const lines = clean.split(', ')
-  let currentLetter
-
-  // Skip the first token.
-  for (let i = 1; i < lines.length; i++) {
-    if (lines[i].indexOf(' ') >= 0) {
-      const tokens = lines[i].split(' ')
-      currentLetter = tokens[0]
-      output[currentLetter + tokens[1]] = player
-    } else {
-      // The line only contains a number.
-      output[currentLetter + lines[i]] = player
-    }
-  }
-}
-
-// Conversion //////////////////////////////////////////////
-const src = readFileSync(srcPath, 'utf8')
-const domRoot = parse(src)
-
-// Remove pageNum nodes
-const pageNums = domRoot.querySelectorAll('.pageNum')
-pageNums.forEach(
-  (element) => element.remove()
-)
 
 // Extract guide chapters.
 const chapters = []
@@ -150,18 +112,15 @@ const chapters = []
 chapterIds.forEach((id, index) => {
   // Extract the title and body
   const titleElement = extractTitle(domRoot, id);
-  const bodyElement = extractBody(domRoot, id);
 
   // Extract text content and calculate word count
-  const chapterTitle = titleElement.text.trim();
-  const chapterBody = bodyElement.text.trim();
-  const wordCount = calculateWordCount(chapterBody);
+  const chapterTitle = titleElement.textContent;
+  const wordCount = calculateWordCount(titleElement);
 
   chapters.push({
     chapter_number: index + 1, // Chapter numbers start from 1
     chapter_title: chapterTitle,
-    word_count: wordCount,
-    body: chapterBody
+    word_count: wordCount
   });
 });
 
